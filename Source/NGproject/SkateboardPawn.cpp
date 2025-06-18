@@ -96,5 +96,14 @@ void ASkateboardPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Movimento contínuo (WASD)
+	PlayerInputComponent->BindAxis("MoveForward", this, &ASkateboardPawn::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ASkateboardPawn::MoveRight);
+
+	// Ações (teclas configuradas)
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASkateboardPawn::Jump); // Barra de Espaço
+	PlayerInputComponent->BindAction("Push", IE_Pressed, this, &ASkateboardPawn::StartPush); // Tecla Q (pressionar)
+	PlayerInputComponent->BindAction("Push", IE_Released, this, &ASkateboardPawn::StopPush); // Tecla Q (soltar)
+
 }
 
