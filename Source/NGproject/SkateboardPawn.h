@@ -34,13 +34,13 @@ public:
 
 	// Movement Variables
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float MoveSpeed = 800.0f;
+	float MoveSpeed = 150.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float PushBoost = 400.0f;
+	float PushBoost = 200.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float JumpForce = 1000.0f;
+	float JumpForce = 100.0f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -53,7 +53,10 @@ private:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool bIsPushing = false;
+
 	FVector CurrentVelocity;
+	FVector MovementInput;
+	bool bIsPushing;
+	float CurrentMoveSpeed;
 
 };
