@@ -2,6 +2,6 @@
 	"BuildId": "37670630",
 	"Modules": 
 	{
-		"Skate": "UnrealEditor-Skate-Win64-DebugGame.dll"
+		"NGproject": "UnrealEditor-NGproject-Win64-DebugGame.dll"
 	}
 }
