@@ -26,13 +26,14 @@ ASkateboardPawn::ASkateboardPawn()
 	SkateboardMesh->SetSimulatePhysics(true);
 	SkateboardMesh->SetLinearDamping(0.3f);
 	SkateboardMesh->SetAngularDamping(0.5f);
-	SkateboardMesh->BodyInstance.bLockRotation = true;
-	SkateboardMesh->SetNotifyRigidBodyCollision(true);
+	SkateboardMesh->BodyInstance.bLockRotation = false;
+	SkateboardMesh->BodyInstance.bLockXRotation = true;
+	SkateboardMesh->BodyInstance.bLockYRotation = true;
 
 	// Create a Spring Arm
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 300.f;
+	SpringArm->TargetArmLength = 500.f;
 	SpringArm->bUsePawnControlRotation = true;
 
 	// Create Camera
@@ -42,6 +43,15 @@ ASkateboardPawn::ASkateboardPawn()
 	// Init variables
 	CurrentMoveSpeed = MoveSpeed;
 	bIsPushing = false;
+
+	SpringArm->bUsePawnControlRotation = false; // Importante!
+	SpringArm->bInheritPitch = true;
+	SpringArm->bInheritYaw = true;
+	SpringArm->bInheritRoll = false;
+
+	// Camera Control
+	SpringArm->SetRelativeRotation(FRotator(-15.0f, 0, 0)); // Ângulo inicial
+	SpringArm->CameraLagSpeed = 3.0f; // Para suavizar o movimento
 
 }
 
@@ -58,18 +68,38 @@ void ASkateboardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	// Aplica movimento se houver input
 	if (!MovementInput.IsZero())
 	{
-		// Get camera forward vector (ignoring pitch)
-		FRotator CameraRot = GetControlRotation();
-		CameraRot.Pitch = 0;
-		CameraRot.Roll = 0;
+		// Obtém a rotação atual do skate
+		FRotator SkateRotation = SkateboardMesh->GetComponentRotation();
 
-		FVector Direction = CameraRot.RotateVector(FVector(MovementInput.X, MovementInput.Y, 0));
+		// Calcula a direção do movimento relativa ao skate
+		FVector Direction = SkateRotation.RotateVector(FVector(MovementInput.X, MovementInput.Y, 0));
 		Direction.Normalize();
 
-		// Apply physical force
-		SkateboardMesh->AddForce(Direction * CurrentMoveSpeed * DeltaTime * 1000.f, NAME_None, true);
+		// Aplica força na direção calculada
+		SkateboardMesh->AddForce(
+			Direction * CurrentMoveSpeed * DeltaTime * 600.f,
+			NAME_None,
+			true
+		);
+	}
+
+	{
+		// Alinha a rotação do skate com a direção do movimento
+		if (!SkateboardMesh->GetPhysicsLinearVelocity().IsNearlyZero(10.0f))
+		{
+			FRotator TargetRotation = SkateboardMesh->GetPhysicsLinearVelocity().Rotation();
+			TargetRotation.Pitch = 0;
+			TargetRotation.Roll = 0;
+
+			FRotator CurrentRotation = SkateboardMesh->GetComponentRotation();
+			FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, 5.0f);
+
+			SkateboardMesh->SetWorldRotation(NewRotation);
+		}
 	}
 }
 
@@ -84,6 +114,16 @@ void ASkateboardPawn::MoveForward(float Value)
 void ASkateboardPawn::MoveRight(float Value)
 {
 	MovementInput.Y = Value;
+
+	if (Value != 0.0f && SkateboardMesh->IsSimulatingPhysics())
+	{
+		float TurnSpeed = 10.0f; // Reduzi de 50 para 30 (menos sensível)
+		SkateboardMesh->AddTorqueInDegrees(
+			FVector(0, 0, Value * TurnSpeed * SkateboardMesh->GetMass()),
+			NAME_None,
+			true
+		);
+	}
 }
 
 void ASkateboardPawn::StartPush()
@@ -114,17 +154,44 @@ void ASkateboardPawn::Jump()
 	}
 }
 
+void ASkateboardPawn::LookUp(float Value)
+{
+	if (Value != 0.0f)
+	{
+		// Apenas inclina a câmera (vertical)
+		float NewPitch = SpringArm->GetRelativeRotation().Pitch + (Value * CameraPitchSpeed * GetWorld()->GetDeltaSeconds());
+		NewPitch = FMath::Clamp(NewPitch, -80.0f, 80.0f); // Limita o ângulo
+		SpringArm->SetRelativeRotation(FRotator(NewPitch, 0, 0));
+	}
+}
+
+void ASkateboardPawn::Turn(float Value)
+{
+	if (Value != 0.0f)
+	{
+		// Apenas rotaciona a câmera horizontalmente
+		float NewYaw = SpringArm->GetRelativeRotation().Yaw + (Value * CameraYawSpeed * GetWorld()->GetDeltaSeconds());
+		SpringArm->SetRelativeRotation(FRotator(SpringArm->GetRelativeRotation().Pitch, NewYaw, 0));
+	}
+}
+
 
 void ASkateboardPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// inputs
+	// Movimento
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASkateboardPawn::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASkateboardPawn::MoveRight);
+
+	// Ações
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASkateboardPawn::Jump);
 	PlayerInputComponent->BindAction("Push", IE_Pressed, this, &ASkateboardPawn::StartPush);
 	PlayerInputComponent->BindAction("Push", IE_Released, this, &ASkateboardPawn::StopPush);
+
+	// Controles de câmera
+	PlayerInputComponent->BindAxis("LookUp", this, &ASkateboardPawn::LookUp);
+	PlayerInputComponent->BindAxis("Turn", this, &ASkateboardPawn::Turn);
 
 }
 

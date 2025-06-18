@@ -40,7 +40,7 @@ public:
 	float PushBoost = 200.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float JumpForce = 100.0f;
+	float JumpForce = 300.0f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -58,5 +58,15 @@ private:
 	FVector MovementInput;
 	bool bIsPushing;
 	float CurrentMoveSpeed;
+
+	// Controles de camera
+	void LookUp(float Value);
+	void Turn(float Value);
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float CameraPitchSpeed = 50.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float CameraYawSpeed = 50.0f;
 
 };
