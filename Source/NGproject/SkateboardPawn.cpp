@@ -53,6 +53,9 @@ ASkateboardPawn::ASkateboardPawn()
 	SpringArm->SetRelativeRotation(FRotator(-15.0f, 0, 0)); // Ângulo inicial
 	SpringArm->CameraLagSpeed = 3.0f; // Para suavizar o movimento
 
+	// Configura colisão
+	SkateboardMesh->OnComponentHit.AddDynamic(this, &ASkateboardPawn::OnSkateboardHit);
+
 }
 
 
@@ -175,6 +178,20 @@ void ASkateboardPawn::Turn(float Value)
 	}
 }
 
+void ASkateboardPawn::OnSkateboardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+	const FHitResult& Hit)
+{
+	if (OtherActor && OtherActor->ActorHasTag("Score"))
+	{
+		TotalScore += 10;
+		OtherActor->Destroy();
+
+		// Debug (Window -> Developer Tools -> Output Log)
+		UE_LOG(LogTemp, Warning, TEXT("Pontuação: %d"), TotalScore);
+	}
+}
+
 
 void ASkateboardPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -191,6 +208,8 @@ void ASkateboardPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	// Controles de câmera
 	PlayerInputComponent->BindAxis("LookUp", this, &ASkateboardPawn::LookUp);
+
+
 
 }
 

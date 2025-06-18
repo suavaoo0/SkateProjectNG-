@@ -22,6 +22,14 @@ public:
 	void StopPush();
 	void Jump();
 
+	UFUNCTION()
+	void OnSkateboardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+		const FHitResult& Hit);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Score")
+	int32 TotalScore = 0;
+
 	// Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UStaticMeshComponent* SkateboardMesh;

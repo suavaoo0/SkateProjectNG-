@@ -2,12 +2,22 @@
 
 
 #include "ScoreActor.h"
+#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 AScoreActor::AScoreActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+
+    CollisionComponent = CreateDefaultSubobject<USphereComponent>("CollisionComponent");
+    RootComponent = CollisionComponent;
+    CollisionComponent->InitSphereRadius(50.0f);
+    CollisionComponent->SetCollisionProfileName("OverlapAllDynamic");
+
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("MeshComponent");
+    MeshComponent->SetupAttachment(RootComponent);
 
 }
 

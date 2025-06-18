@@ -15,6 +15,14 @@ public:
 	// Sets default values for this actor's properties
 	AScoreActor();
 
+	int32 ScoreValue = 10;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	class UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	class USphereComponent* CollisionComponent;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
