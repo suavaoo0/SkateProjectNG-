@@ -34,13 +34,13 @@ public:
 
 	// Movement Variables
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float MoveSpeed = 150.0f;
+	float MoveSpeed = 200.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float PushBoost = 200.0f;
+	float PushBoost = 300.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float JumpForce = 300.0f;
+	float JumpForce = 600.0f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -64,9 +64,9 @@ private:
 	void Turn(float Value);
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	float CameraPitchSpeed = 50.0f;
+	float CameraPitchSpeed = 20.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	float CameraYawSpeed = 50.0f;
+	float CameraYawSpeed = 20.0f;
 
 };

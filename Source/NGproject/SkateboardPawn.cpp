@@ -191,7 +191,6 @@ void ASkateboardPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	// Controles de câmera
 	PlayerInputComponent->BindAxis("LookUp", this, &ASkateboardPawn::LookUp);
-	PlayerInputComponent->BindAxis("Turn", this, &ASkateboardPawn::Turn);
 
 }
 
